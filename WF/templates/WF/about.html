@@ -1,0 +1,456 @@
+{% extends 'WF/base.html' %}
+{% block title %}About{% endblock %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f3f4f6;
+    color: #374151;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .container {
+    max-width: 6xl;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    flex-grow: 1;
+  }
+  .image-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.05);
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+    text-align: center;
+  }
+  .image-card:hover {
+    box-shadow: 0 20px 40px rgb(99 102 241 / 0.3);
+    transform: translateY(-6px) scale(1.05);
+    border-color: #6366f1;
+    z-index: 10;
+  }
+  .image-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 1px solid #e5e7eb;
+    transition: transform 0.5s ease;
+    display: block;
+  }
+  .image-card:hover img {
+    transform: scale(1.1);
+  }
+  .desc-text {
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    color: #4b5563;
+    font-weight: 600;
+    line-height: 1.4;
+    user-select: text;
+    word-break: break-word;
+  }
+  .desc-text a {
+    display: none; /* Hide the link */
+  }
+  .actions {
+    margin-top: auto;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .actions a {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    outline-offset: 2px;
+    user-select: none;
+  }
+  .actions a.edit {
+    color: #4f46e5;
+  }
+  .actions a.edit:hover,
+  .actions a.edit:focus {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    outline: none;
+  }
+  .actions a.delete {
+    color: #dc2626;
+  }
+  .actions a.delete:hover,
+  .actions a.delete:focus {
+    background-color: #fee2e2;
+    color: #991b1b;
+    outline: none;
+  }
+  #openModalBtn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: #4f46e5;
+    border-radius: 9999px;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgb(79 70 229 / 0.5);
+    z-index: 100;
+  }
+  #openModalBtn:hover {
+    background-color: #4338ca;
+    transform: scale(1.15) rotate(90deg);
+    box-shadow: 0 15px 30px rgb(67 56 202 / 0.7);
+  }
+  #openModalBtn i {
+    color: white;
+    font-size: 1.75rem;
+    pointer-events: none;
+  }
+  /* Modal styles */
+  #modal {
+    background: rgba(31, 41, 55, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  #modal > div {
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.3);
+  }
+  #modal h2 {
+    color: #1f2937;
+    font-weight: 700;
+    font-size: 1.75rem;
+    border-bottom: 3px solid #4f46e5;
+    padding-bottom: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  #modal label {
+    color: #374151;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  #modal input[type="file"],
+  #modal input[type="url"],
+  #modal input[type="text"] {
+    width: 100%;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  #modal input[type="file"]:focus,
+  #modal input[type="url"]:focus,
+  #modal input[type="text"]:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 4px rgb(79 70 229 / 0.4);
+  }
+  #modal button {
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+    padding: 0.6rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+  }
+  #modal button[type="button"] {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+  #modal button[type="button"]:hover,
+  #modal button[type="button"]:focus {
+    background-color: #d1d5db;
+    outline: none;
+  }
+  #modal button[type="submit"] {
+    background-color: #4f46e5;
+    color: white;
+  }
+  #modal button[type="submit"]:hover,
+  #modal button[type="submit"]:focus {
+    background-color: #4338ca;
+    outline: none;
+  }
+  /* Responsive tweaks */
+  @media (max-width: 640px) {
+    .image-card img {
+      height: 140px;
+    }
+    #openModalBtn {
+      width: 48px;
+      height: 48px;
+      bottom: 1.5rem;
+      right: 1.5rem;
+    }
+  }
+  /* Fullscreen image modal */
+  #imagePreviewModal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    cursor: zoom-out;
+  }
+  #imagePreviewModal img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 1rem;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+    user-select: none;
+  }
+  /* Scrollbar styling for modal content if needed */
+  #modal > div {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  #modal > div::-webkit-scrollbar {
+    width: 8px;
+  }
+  #modal > div::-webkit-scrollbar-thumb {
+    background-color: rgba(79, 70, 229, 0.5);
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <button id="openModalBtn" aria-label="Open upload image modal" title="Upload new image">
+    <i class="fas fa-plus" aria-hidden="true"></i>
+  </button>
+
+  <section class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-6 gap-y-10">
+    {% for image in images %}
+    <div class="image-item image-card" tabindex="0" aria-label="Image card with description and link" data-link="{{ image.link|default:'' }}">
+      <img src="{{ image.image.url }}" alt="Photo showing {{ image.description|default:'an image' }}" class="clickable-image" />
+      <p class="desc-text">{{ image.description }}</p>
+
+      {% if user == image.user or user.is_superuser %}
+        <div class="actions">
+          <a href="{% url 'edit_image' image.id %}" class="edit focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded" role="button" tabindex="0">Edit</a>
+          <span aria-hidden="true" class="text-gray-300 select-none">|</span>
+          <a href="#" class="delete focus:outline-none focus:ring-2 focus:ring-red-500 rounded" role="button" tabindex="0" data-id="{{ image.id }}">Delete</a>
+        </div>
+      {% endif %}
+    </div>
+    {% empty %}
+      <p class="text-center text-gray-500 col-span-full">No images uploaded yet.</p>
+    {% endfor %}
+  </section>
+</div>
+
+<div id="modal" class="fixed inset-0 flex items-center justify-center hidden z-50" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+  <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-md mx-4">
+    <h2 id="modalTitle" class="text-xl font-bold mb-6">Upload Image</h2>
+    <form id="imageUploadForm" novalidate>
+      {% csrf_token %}
+      <div class="mb-6">
+        <label for="uploadImage">Upload Image</label>
+        <input type="file" name="image" id="uploadImage" accept="image/*" required aria-required="true" />
+      </div>
+      <div class="mb-6">
+        <label for="linkUrl">Link (optional)</label>
+        <input type="url" name="linkUrl" id="linkUrl" placeholder="https://example.com" />
+      </div>
+      <div class="mb-6">
+        <label for="desc">Description</label>
+        <input type="text" name="desc" id="desc" required aria-required="true" placeholder="Describe the image" />
+      </div>
+      <div class="flex justify-end space-x-3">
+        <button type="button" onclick="modal.classList.add('hidden')" class="focus:outline-none focus:ring-2 focus:ring-gray-400">Cancel</button>
+        <button type="submit" class="bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Upload</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Fullscreen image preview modal -->
+<div id="imagePreviewModal" role="dialog" aria-modal="true" tabindex="-1">
+  <img src="" alt="Full size image preview" />
+</div>
+
+<script>
+const openBtn = document.getElementById('openModalBtn');
+const modal = document.getElementById('modal');
+const form = document.getElementById('imageUploadForm');
+const imagePreviewModal = document.getElementById('imagePreviewModal');
+const previewImage = imagePreviewModal.querySelector('img');
+
+openBtn.addEventListener('click', () => {
+  {% if user.is_authenticated %}
+    modal.classList.remove('hidden');
+    document.getElementById('uploadImage').focus();
+  {% else %}
+    window.location.href = '{% url "login" %}?next=' + window.location.pathname;
+  {% endif %}
+});
+
+// Close modal on Escape key
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!modal.classList.contains('hidden')) {
+      modal.classList.add('hidden');
+      openBtn.focus();
+    }
+    if (imagePreviewModal.style.display === 'flex') {
+      imagePreviewModal.style.display = 'none';
+      document.activeElement.blur();
+    }
+  }
+});
+
+// Trap focus inside modal
+modal.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    const focusableElements = modal.querySelectorAll('input, button, [tabindex]:not([tabindex="-1"])');
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
+  }
+});
+
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const imageFile = document.getElementById('uploadImage').files[0];
+  if (!imageFile) {
+    alert("Please select an image file.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('image', imageFile);
+  formData.append('linkUrl', document.getElementById('linkUrl').value);
+  formData.append('desc', document.getElementById('desc').value);
+
+  fetch("{% url 'upload_image' %}", {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    alert(data.message || "Image uploaded successfully!");
+    modal.classList.add('hidden');
+    window.location.reload();
+  })
+  .catch(error => {
+    alert("Upload failed.");
+    console.error("Upload error:", error);
+  });
+});
+
+// Image card click handling: single click shows full image, double click navigates to link
+document.querySelectorAll('.image-item').forEach(card => {
+  let clickTimeout = null;
+  card.addEventListener('click', (e) => {
+    // Prevent clicks on edit/delete links from triggering image click
+    if (e.target.closest('.actions a')) return;
+
+    e.preventDefault();
+    if (clickTimeout !== null) {
+      // Double click detected
+      clearTimeout(clickTimeout);
+      clickTimeout = null;
+      const link = card.getAttribute('data-link');
+      if (link && link.trim() !== '') {
+        window.open(link, '_blank', 'noopener');
+      }
+    } else {
+      // Single click: wait to see if double click happens
+      clickTimeout = setTimeout(() => {
+        clickTimeout = null;
+        // Show full image preview
+        const img = card.querySelector('img.clickable-image');
+        if (img) {
+          previewImage.src = img.src;
+          previewImage.alt = img.alt || 'Full size image preview';
+          imagePreviewModal.style.display = 'flex';
+          imagePreviewModal.focus();
+        }
+      }, 250); // 250ms delay to detect double click
+    }
+  });
+});
+
+// Delete button handling with confirmation and fetch request
+document.querySelectorAll('.actions a.delete').forEach(deleteBtn => {
+  deleteBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    const confirmed = confirm('Are you sure you want to delete this image?');
+    if (!confirmed) return;
+
+    const imageId = this.getAttribute('data-id');
+    if (!imageId) return;
+
+    fetch("{% url 'delete_image' 0 %}".replace('0', imageId), {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: imageId })
+    })
+    .then(response => {
+      if (response.ok) {
+        // Remove the image card from DOM
+        const card = this.closest('.image-item');
+        if (card) card.remove();
+      } else {
+        return response.json().then(data => { throw new Error(data.error || 'Delete failed'); });
+      }
+    })
+    .catch(err => {
+      alert(err.message || 'Failed to delete image.');
+      console.error('Delete error:', err);
+    });
+  });
+});
+
+// Close preview on click outside image
+imagePreviewModal.addEventListener('click', (e) => {
+  if (e.target === imagePreviewModal) {
+    imagePreviewModal.style.display = 'none';
+  }
+});
+</script>
+</body>
+{% endblock %}

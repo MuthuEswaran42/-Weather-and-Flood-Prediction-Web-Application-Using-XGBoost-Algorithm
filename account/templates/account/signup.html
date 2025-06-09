@@ -1,0 +1,28 @@
+{% extends 'WF/base.html' %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded">
+    <h2 class="text-2xl font-bold mb-4">Sign Up</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" class="w-full border px-3 py-2 rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="w-full border px-3 py-2 rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="password1">Password</label>
+            <input type="password" id="password1" name="password1" class="w-full border px-3 py-2 rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="password2">Confirm Password</label>
+            <input type="password" id="password2" name="password2" class="w-full border px-3 py-2 rounded" required>
+        </div>
+        <button type="submit" class="w-full py-2 bg-green-600 text-white rounded">Sign Up</button>
+    </form>
+    <p class="mt-4 text-sm">Already have an account? <a href="{% url 'login' %}" class="text-blue-600">Log in</a></p>
+</div>
+{% endblock %}

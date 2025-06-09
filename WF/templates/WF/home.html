@@ -1,0 +1,547 @@
+{% extends 'WF/base.html' %}
+
+{% block title %}Weather Prediction{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    /* Search input styling */
+    .search-container {
+      position: relative;
+      width: 100%;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 3.5rem 0.75rem 3.5rem;
+      border-radius: 9999px;
+      border: 2px solid #3b82f6; /* Tailwind blue-500 */
+      font-size: 1.125rem; /* text-lg */
+      font-weight: 600;
+      color: #1e40af; /* Tailwind blue-900 */
+      background-color: #dbeafe; /* Tailwind blue-200 */
+      transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+      box-shadow: inset 0 1px 3px rgb(59 130 246 / 0.3);
+    }
+    .search-input::placeholder {
+      color: #93c5fd; /* Tailwind blue-300 */
+      font-weight: 500;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #2563eb; /* Tailwind blue-600 */
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.6);
+      background-color: white;
+    }
+    .search-icon-left {
+      position: absolute;
+      top: 50%;
+      left: 1rem;
+      transform: translateY(-50%);
+      color: #3b82f6; /* Tailwind blue-500 */
+      font-size: 1.5rem;
+      pointer-events: none;
+      line-height: 1;
+      filter: drop-shadow(0 0 1px rgb(59 130 246 / 0.7));
+    }
+    .search-button {
+      position: absolute;
+      top: 50%;
+      right: 0.5rem;
+      transform: translateY(-50%);
+      background-color: #3b82f6; /* Tailwind blue-500 */
+      border: none;
+      border-radius: 9999px;
+      width: 3rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 3px 8px rgba(59, 130, 246, 0.7);
+    }
+    .search-button:hover {
+      background-color: #2563eb; /* Tailwind blue-600 */
+      box-shadow: 0 5px 15px rgba(37, 99, 235, 0.9);
+    }
+  </style>
+{% endblock %}
+{% block content %}
+<body class="bg-gradient-to-br from-blue-200 via-blue-100 to-white p-6 min-h-screen flex items-center justify-center font-sans">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-10 w-full md:w-4/5">
+    <!-- Left Search and Info -->
+    <div class="w-full md:w-1/3 flex flex-col gap-8">
+      <form class="mb-6" method="POST">
+        {% csrf_token %}
+        <div class="flex rounded-lg overflow-hidden shadow-md">
+          <span class="bg-blue-700 text-white flex items-center justify-center px-4 text-xl">
+            <i class="fa-solid fa-cloud">🌦️</i>
+          </span>
+          <input
+            class="flex-grow border border-blue-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-400 rounded-r-lg px-4 py-3 text-lg font-semibold placeholder-blue-400"
+            name="city"
+            placeholder="e.g. Chennai"
+            type="text"
+            value="{{location}}"
+          />
+          <button
+            class="bg-blue-700 text-white px-6 flex items-center justify-center hover:bg-blue-800 transition-colors duration-300"
+            type="submit"
+          >
+            <i class="fa-solid fa-magnifying-glass text-lg">🔍︎</i>
+          </button>
+        </div>
+      </form>
+      <div class="bg-gradient-to-tr from-blue-600 to-blue-400 rounded-2xl p-8 text-white shadow-lg flex flex-col items-center">
+        <h2 class="text-6xl font-extrabold drop-shadow-lg">{{ current_temp }}°</h2>
+        <p class="mt-2 text-lg font-semibold drop-shadow-md">
+          Feels like: <strong>{{ feels_like }}°</strong>
+        </p>
+      </div>
+      <ul class="list-none space-y-3 text-gray-700 font-semibold text-lg">
+        <li class="flex justify-between bg-blue-50 rounded-lg px-5 py-3 shadow-inner">
+          <span>Humidity:</span>
+          <span>{{ Humidity }}%</span>
+        </li>
+        <li class="flex justify-between bg-blue-50 rounded-lg px-5 py-3 shadow-inner">
+          <span>Clouds:</span>
+          <span>{{ clouds }}%</span>
+        </li>
+      </ul>
+      <!-- Flood Images with Links (5 images) -->
+      <div class="flood-image-container mt-6 grid grid-cols-1 gap-4">
+        <img
+    alt="Aerial view of a flooded urban area with submerged streets and buildings under cloudy sky"
+    src="https://storage.googleapis.com/a1aa/image/18f54e0c-fcd3-41f2-f5ee-2a3ad1077eca.jpg"
+    style="border-radius: 1rem; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer; width: 100%; height: 120px; object-fit: cover;"
+    onmouseover="this.style.transform='scale(1.07)'; this.style.boxShadow='0 10px 25px rgba(0, 0, 0, 0.2)';"
+    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 6px 15px rgba(0, 0, 0, 0.12)';"
+  />
+  <img
+    alt="Aerial view of farmhouses surrounded by floodwaters in a rural area with cloudy sky"
+    src="https://storage.googleapis.com/a1aa/image/aa4a7d59-ccb0-4fba-b769-d924bdaeb590.jpg"
+    style="border-radius: 1rem; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer; width: 100%; height: 120px; object-fit: cover;"
+    onmouseover="this.style.transform='scale(1.07)'; this.style.boxShadow='0 10px 25px rgba(0, 0, 0, 0.2)';"
+    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 6px 15px rgba(0, 0, 0, 0.12)';"
+  />
+  <img
+    alt="Flooded street with water reaching car doors and people wading through water in urban neighborhood"
+    src="https://storage.googleapis.com/a1aa/image/281bf97a-6ff7-409d-d141-1dba1808198c.jpg"
+    style="border-radius: 1rem; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer; width: 100%; height: 120px; object-fit: cover;"
+    onmouseover="this.style.transform='scale(1.07)'; this.style.boxShadow='0 10px 25px rgba(0, 0, 0, 0.2)';"
+    onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 6px 15px rgba(0, 0, 0, 0.12)';"
+  />
+  
+      </div>
+    </div>
+    <!-- Right Main Section -->
+    <div class="w-full md:w-2/3 flex flex-col bg-white rounded-3xl p-8 shadow-xl overflow-auto">
+      <h4 class="text-blue-600 font-semibold mb-1 tracking-wide uppercase">Weather Prediction</h4>
+      <h1 class="text-5xl font-extrabold mb-6 text-gray-900">{{ description }}</h1>
+      <div class="flex items-center text-gray-700 mb-8 space-x-3 text-lg font-medium">
+        <i class="fa-solid fa-map-marker-alt text-blue-600 text-2xl"></i>
+        <p class="mb-0">
+          <strong>{{ city }}</strong>, {{ country }} —
+          <small class="text-gray-500">{{ date }}</small>
+        </p>
+      </div>
+      <p class="text-gray-700 mb-10 text-lg leading-relaxed space-y-1">
+        <span><strong>Wind:</strong> {{ wind }} km/h</span> |
+        <span><strong>Pressure:</strong> {{ pressure }} mb</span> |
+        <span><strong>Visibility:</strong> {{ visibility }} km</span><br />
+        <span><strong>Max Temp:</strong> {{ MaxTemp }}°</span> |
+        <span><strong>Min Temp:</strong> {{ MinTemp }}°</span>
+      </p>
+      <!-- Forecast Section -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 mb-8">
+        <div class="forecast-item border border-blue-400 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default">
+          <p class="forecast-time font-semibold mb-2 text-blue-700">{{ time1 }}</p>
+          <p class="forecast-temperaturevalue text-3xl font-extrabold mb-2 text-gray-900">{{ temp1 }}°</p>
+          <p class="text-blue-600 font-semibold">Humidity: {{ hum1 }}%</p>
+        </div>
+        <div class="forecast-item border border-blue-400 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default">
+          <p class="forecast-time font-semibold mb-2 text-blue-700">{{ time2 }}</p>
+          <p class="forecast-temperaturevalue text-3xl font-extrabold mb-2 text-gray-900">{{ temp2 }}°</p>
+          <p class="text-blue-600 font-semibold">Humidity: {{ hum2 }}%</p>
+        </div>
+        <div class="forecast-item border border-blue-400 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default">
+          <p class="forecast-time font-semibold mb-2 text-blue-700">{{ time3 }}</p>
+          <p class="forecast-temperaturevalue text-3xl font-extrabold mb-2 text-gray-900">{{ temp3 }}°</p>
+          <p class="text-blue-600 font-semibold">Humidity: {{ hum3 }}%</p>
+        </div>
+        <div class="forecast-item border border-blue-400 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default">
+          <p class="forecast-time font-semibold mb-2 text-blue-700">{{ time4 }}</p>
+          <p class="forecast-temperaturevalue text-3xl font-extrabold mb-2 text-gray-900">{{ temp4 }}°</p>
+          <p class="text-blue-600 font-semibold">Humidity: {{ hum4 }}%</p>
+        </div>
+        <div class="forecast-item border border-blue-400 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default">
+          <p class="forecast-time font-semibold mb-2 text-blue-700">{{ time5 }}</p>
+          <p class="forecast-temperaturevalue text-3xl font-extrabold mb-2 text-gray-900">{{ temp5 }}°</p>
+          <p class="text-blue-600 font-semibold">Humidity: {{ hum5 }}%</p>
+        </div>
+      </div>
+      <!-- Rainfall & Flood Prediction Section -->
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">Rainfall &amp; Flood Prediction</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 mb-10">
+        <div class="border border-green-500 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default bg-green-50">
+          <p class="font-semibold mb-2 text-green-700">{{ mon1 }}</p>
+          <p class="text-blue-600 font-semibold">Rainfall: {{ rainfall1 }} mm</p>
+          <p class="text-blue-600 font-semibold">Flood: {{ flood1 }}</p>
+        </div>
+        <div class="border border-green-500 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default bg-green-50">
+          <p class="font-semibold mb-2 text-green-700">{{ mon2 }}</p>
+          <p class="text-blue-600 font-semibold">Rainfall: {{ rainfall2 }} mm</p>
+          <p class="text-blue-600 font-semibold">Flood: {{ flood2 }}</p>
+        </div>
+        <div class="border border-green-500 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default bg-green-50">
+          <p class="font-semibold mb-2 text-green-700">{{ mon3 }}</p>
+          <p class="text-blue-600 font-semibold">Rainfall: {{ rainfall3 }} mm</p>
+          <p class="text-blue-600 font-semibold">Flood: {{ flood3 }}</p>
+        </div>
+        <div class="border border-green-500 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default bg-green-50">
+          <p class="font-semibold mb-2 text-green-700">{{ mon4 }}</p>
+          <p class="text-blue-600 font-semibold">Rainfall: {{ rainfall4 }} mm</p>
+          <p class="text-blue-600 font-semibold">Flood: {{ flood4 }}</p>
+        </div>
+        <div class="border border-green-500 rounded-2xl p-5 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-default bg-green-50">
+          <p class="font-semibold mb-2 text-green-700">{{ mon5 }}</p>
+          <p class="text-blue-600 font-semibold">Rainfall: {{ rainfall5 }} mm</p>
+          <p class="text-blue-600 font-semibold">Flood: {{ flood5 }}</p>
+        </div>
+      </div>
+      <!-- Chart -->
+      <canvas class="w-full rounded-xl shadow-lg" height="100" id="chart"></canvas>
+    </div>
+  </div>
+  <!-- Chatbot Button with fixed positioning so it stays visible on scroll -->
+  <button
+    aria-label="Toggle chatbot"
+    class="fixed bottom-5 right-5 bg-purple-800 text-white rounded-full p-4 text-2xl cursor-pointer z-50 shadow-lg transition-colors duration-300 flex items-center justify-center select-none hover:bg-purple-900 hover:shadow-xl"
+    id="chatbotToggle"
+    style="box-shadow: 0 4px 14px rgba(106, 13, 173, 0.8);"
+    title="Open Chatbot"
+  >
+    <!-- Custom chat icon SVG -->
+    <svg
+      class="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      style="color: white;"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </button>
+  <div
+    aria-labelledby="chatbotHeader"
+    aria-modal="true"
+    class="fixed bottom-20 right-5 w-80 h-[460px] bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden z-50 font-sans border-2 border-purple-800 hidden"
+    id="chatbotContainer"
+    role="dialog"
+    tabindex="-1"
+  >
+    <div
+      class="bg-purple-800 text-white text-center p-3 text-lg font-bold relative select-none shadow-md tracking-wide"
+      id="chatbotHeader"
+    >
+      Chatbot
+      <button
+        aria-label="Close chatbot"
+        class="close-btn absolute right-3 top-3 text-2xl text-gray-200 hover:text-white focus:outline-none"
+        onclick="document.getElementById('chatbotToggle').click()"
+        tabindex="0"
+      >
+        ×
+      </button>
+    </div>
+    <div
+      aria-atomic="false"
+      aria-live="polite"
+      class="flex-1 p-4 overflow-y-auto bg-purple-50 scrollbar-thin scrollbar-thumb-purple-800 scrollbar-track-purple-200 text-sm leading-relaxed text-gray-800"
+      id="chatbotMessages"
+    ></div>
+    <div class="flex p-4 border-t border-gray-300 bg-white items-center gap-3" id="chatbotInputArea">
+      <input
+        aria-label="Chat input"
+        autocomplete="off"
+        class="flex-1 border-2 border-purple-800 rounded-full px-4 py-2 text-purple-900 font-medium bg-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-600"
+        id="chatbotInput"
+        placeholder="Type here..."
+        type="text"
+      />
+      <button
+        aria-label="Send message"
+        class="bg-purple-800 text-white rounded-full p-2 flex items-center justify-center shadow-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-600"
+        id="chatbotSendBtn"
+        title="Send"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <line x1="22" x2="11" y1="2" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <!-- Chart.js and custom script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module">
+    document.addEventListener("DOMContentLoaded", () => {
+      const chartElement = document.getElementById("chart");
+      if (!chartElement) {
+        console.error("Canvas element not found.");
+        return;
+      }
+
+      const ctx = chartElement.getContext("2d");
+      const gradient = ctx.createLinearGradient(0, 0, 0, 100);
+      gradient.addColorStop(0, "rgba(250, 0, 0, 1)");
+      gradient.addColorStop(1, "rgba(136, 255, 0, 1)");
+
+      const forecastItems = document.querySelectorAll(".forecast-item");
+      const temps = [];
+      const times = [];
+
+      forecastItems.forEach((item) => {
+        const time = item.querySelector(".forecast-time")?.textContent;
+        const tempText = item.querySelector(".forecast-temperaturevalue")?.textContent;
+        const temp = parseFloat(tempText?.replace("°", ""));
+
+        if (time && !isNaN(temp)) {
+          times.push(time);
+          temps.push(temp);
+        }
+      });
+
+      if (temps.length === 0 || times.length === 0) {
+        console.error("Temperature or time values missing.");
+        return;
+      }
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: times,
+          datasets: [
+            {
+              label: "Temperature (°C)",
+              data: temps,
+              borderColor: gradient,
+              backgroundColor: "rgba(136, 255, 0, 0.2)",
+              borderWidth: 2,
+              tension: 0.4,
+              pointRadius: 3,
+            },
+          ],
+        },
+        options: {
+          plugins: {
+            legend: {
+              display: true,
+            },
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: "Time",
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: "Temperature (°C)",
+              },
+            },
+          },
+          animation: {
+            duration: 750,
+          },
+        },
+      });
+    });
+
+    let chatbotOpen = false;
+    let step = 0;
+    let userData = {
+      name: "",
+      issue: "",
+      phone: "",
+      address: "",
+    };
+
+    // Toggle chatbot open/close
+    document.getElementById("chatbotToggle").onclick = function () {
+      chatbotOpen = !chatbotOpen;
+      document.getElementById("chatbotContainer").style.display = chatbotOpen ? "flex" : "none";
+      if (chatbotOpen) {
+        startChat();
+        document.getElementById("chatbotInput").focus();
+      }
+    };
+
+    // Start the chat fresh
+    function startChat() {
+      step = 0;
+      userData = { name: "", issue: "", phone: "", address: "" };
+      document.getElementById("chatbotMessages").innerHTML = "";
+      botMessage("Hi there! 👋 What's your name?");
+    }
+
+    // Send message
+    document.getElementById("chatbotSendBtn").onclick = function () {
+      const input = document.getElementById("chatbotInput");
+      const message = input.value.trim();
+      if (message !== "") {
+        addUserMessage(message);
+        handleStep(message);
+        input.value = "";
+        input.focus();
+      }
+    };
+
+    // Also send message on Enter key
+    document.getElementById("chatbotInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("chatbotSendBtn").click();
+      }
+    });
+
+    function botMessage(text) {
+      const div = document.createElement("div");
+      div.style.margin = "8px 0";
+      div.style.padding = "12px 18px";
+      div.style.borderRadius = "20px";
+      div.style.maxWidth = "80%";
+      div.style.display = "inline-block";
+      div.style.clear = "both";
+      div.style.fontSize = "14px";
+      div.style.lineHeight = "1.4";
+      div.style.wordWrap = "break-word";
+      div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+      div.style.fontWeight = "500";
+      div.style.letterSpacing = "0.01em";
+      div.style.userSelect = "text";
+      div.style.backgroundColor = "#e9e6f7";
+      div.style.color = "#3b3054";
+      div.style.fontStyle = "normal";
+      div.style.float = "left";
+      div.style.position = "relative";
+      div.textContent = text;
+
+      // Create the arrow using inline styles
+      const arrow = document.createElement("span");
+      arrow.style.position = "absolute";
+      arrow.style.top = "0";
+      arrow.style.left = "-10px";
+      arrow.style.width = "0";
+      arrow.style.height = "0";
+      arrow.style.borderTop = "14px solid #e9e6f7";
+      arrow.style.borderRight = "14px solid transparent";
+      div.appendChild(arrow);
+
+      document.getElementById("chatbotMessages").appendChild(div);
+      document.getElementById("chatbotMessages").scrollTop = document.getElementById("chatbotMessages").scrollHeight;
+    }
+
+    function addUserMessage(text) {
+      const div = document.createElement("div");
+      div.style.margin = "8px 0";
+      div.style.padding = "12px 18px";
+      div.style.borderRadius = "20px";
+      div.style.maxWidth = "80%";
+      div.style.display = "inline-block";
+      div.style.clear = "both";
+      div.style.fontSize = "14px";
+      div.style.lineHeight = "1.4";
+      div.style.wordWrap = "break-word";
+      div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+      div.style.fontWeight = "600";
+      div.style.letterSpacing = "0.02em";
+      div.style.textShadow = "0 0 2px rgba(0,0,0,0.2)";
+      div.style.userSelect = "text";
+      div.style.backgroundColor = "#6a0dad";
+      div.style.color = "white";
+      div.style.float = "right";
+      div.style.position = "relative";
+      div.textContent = text;
+
+      // Create the arrow using inline styles
+      const arrow = document.createElement("span");
+      arrow.style.position = "absolute";
+      arrow.style.top = "0";
+      arrow.style.right = "-10px";
+      arrow.style.width = "0";
+      arrow.style.height = "0";
+      arrow.style.borderTop = "14px solid #6a0dad";
+      arrow.style.borderLeft = "14px solid transparent";
+      div.appendChild(arrow);
+
+      document.getElementById("chatbotMessages").appendChild(div);
+      document.getElementById("chatbotMessages").scrollTop = document.getElementById("chatbotMessages").scrollHeight;
+    }
+
+    function handleStep(message) {
+      if (step === 0) {
+        userData.name = message;
+        botMessage("What issue are you facing?");
+        step++;
+      } else if (step === 1) {
+        userData.issue = message;
+        botMessage("Please enter your phone number and address separated by a comma.");
+        step++;
+      } else if (step === 2) {
+        const parts = message.split(",");
+        if (parts.length >= 2) {
+          userData.phone = parts[0].trim();
+          userData.address = parts.slice(1).join(",").trim();
+          botMessage("✅ Your request is sent. Please wait, we will call you. Thank you!");
+
+          // Send data to backend
+          sendUserData(userData);
+
+          // Restart after 5 seconds
+          setTimeout(startChat, 5000);
+          step++;
+        } else {
+          botMessage("⚠️ Please send phone number and address separated by comma.");
+        }
+      }
+    }
+
+    function sendUserData(data) {
+      fetch("/send-chat/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          console.log("Data sent successfully:", result);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+  </script>
+</body>
+{% endblock %}

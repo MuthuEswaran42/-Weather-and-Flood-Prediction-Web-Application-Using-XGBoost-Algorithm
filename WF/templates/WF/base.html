@@ -1,0 +1,125 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Weather & Flood Prediction{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <style>
+        /* Header enhancements */
+        header {
+            box-shadow: 0 4px 6px -1px rgb(59 130 246 / 0.4), 0 2px 4px -2px rgb(59 130 246 / 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            animation: slideDownFade 0.6s ease forwards;
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        nav a {
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+        nav a:hover {
+            color: #bfdbfe; /* lighter blue */
+            background-color: rgba(255 255 255 / 0.1);
+            border-radius: 0.375rem; /* rounded-md */
+        }
+        form button {
+            transition: color 0.3s ease, background-color 0.3s ease;
+        }
+        form button:hover {
+            color: #bfdbfe;
+            background-color: rgba(255 255 255 / 0.1);
+            border-radius: 0.375rem;
+        }
+
+        /* Main content container */
+        main {
+            max-width: 2000px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            min-height: calc(100vh - 136px); /* header + footer height approx */
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* Footer styling */
+        footer {
+            box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            font-size: 0.875rem; /* text-sm */
+            user-select: none;
+            animation: slideUpFade 0.6s ease forwards;
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 640px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav > div {
+                margin-top: 0.5rem;
+            }
+            nav a, form button, nav span {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideDownFade {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideUpFade {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+    <header class="bg-blue-600 text-white p-4">
+        <nav class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="{% url 'home' %}" class="text-xl font-semibold tracking-wide select-none">Weather & Flood</a>
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'about' %}" class="px-4 py-1 select-none">Images</a>
+                {% if user.is_authenticated %}
+                    <span class="px-4 py-1 select-none">Hello, {{ user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-1 select-none">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="px-4 py-1 select-none">Log In</a>
+                    <a href="{% url 'signup' %}" class="px-4 py-1 select-none">Sign Up</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main class="py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-blue-600 text-white p-4 text-center select-none">
+        <p>&copy; 2025 Weather & Flood Project. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,220 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+main {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    height: 635px;
+    border: 1px solid #fff;
+    border-radius: 25px;
+    overflow: hidden;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+/* Weather Backgrounds */
+main.clouds      { background-image: url('../img/cloudy.jpeg'); }
+main.sunny       { background-image: url('../img/sunny.jpeg'); }
+main.overcast    { background-image: url('../img/overcast.jpeg'); }
+main.mist,
+main.Mist,
+main.haze,
+main.smoke       { background-image: url('../img/mist.jpeg'); }
+main.rain        { background-image: url('../img/rain.jpeg'); }
+main.snow        { background-image: url('../img/snow.jpeg'); }
+main.sleet       { background-image: url('../img/sleet.jpeg'); }
+main.drizzle     { background-image: url('../img/drizzle.jpeg'); }
+main.thunder,
+main.thundery    { background-image: url('../img/thunder.jpeg'); }
+main.blizzard    { background-image: url('../img/blizzard.jpeg'); }
+main.fog         { background-image: url('../img/fog.jpeg'); }
+main.ice         { background-image: url('../img/ice.jpeg'); }
+main.showers     { background-image: url('../img/showers.jpeg'); }
+main.clear       { background-image: url('../img/clear.jpeg'); }
+
+.side-container {
+    width: 250px;
+    height: 100%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(22.5px);
+    border-right: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.search-container {
+    width: 150px;
+    margin-bottom: 55px;
+    padding-bottom: 6px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #fff;
+}
+
+.geo-input {
+    all: unset;
+    flex: 1;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.geo-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-button {
+    background: transparent;
+    border: none;
+    height: 22px;
+    cursor: pointer;
+}
+
+.day-states {
+    width: 100%;
+    margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.day-states_temperature {
+    font-size: 50px;
+}
+
+.day-states_feelslike {
+    font-size: 20px;
+    font-weight: 300;
+    margin: 9px 0 6px;
+}
+
+.day-states_conditions {
+    margin-top: 20px;
+    width: 100%;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.day-states_conditions li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.day-states_condition {
+    font-size: 24px;
+}
+
+.day-states_condition_text {
+    font-size: 13px;
+}
+
+.day-states_feelslike_value {
+    color: #fff;
+}
+
+.main-container {
+    flex: 1;
+    height: 100%;
+    padding: 75px;
+    background-image: url("../img/main-blur.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.secondary-title {
+    font-size: 13px;
+    margin-bottom: 17px;
+}
+
+.weather_primary-title {
+    font-size: 38px;
+    letter-spacing: -1.9px;
+    margin-bottom: 16px;
+}
+
+.weather_location {
+    display: flex;
+    align-items: center;
+    margin-bottom: 26px;
+}
+
+.location-icon {
+    margin-right: 8px;
+    margin-bottom: 7px;
+}
+
+.weather_location-text {
+    font-size: 13px;
+}
+
+.weather_primary-stats {
+    width: 360px;
+    font-size: 13px;
+    margin-bottom: 80px;
+}
+
+.forecast {
+    width: 200%;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.forcast-item {
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+.forecast-time {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.forecast-temperature {
+    font-size: 40px;
+    font-weight: 300;
+}
+
+.forcastwindtext {
+    margin-bottom: 10px;
+}
+
+#chart {
+    margin: 30px auto;
+    width: 100%;
+}
+
+/* Footer/List Display */
+.plz ul {
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    color: #fff;
+    padding-right: 81%;
+}

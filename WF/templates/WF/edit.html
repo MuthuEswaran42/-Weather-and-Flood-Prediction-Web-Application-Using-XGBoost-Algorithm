@@ -1,0 +1,26 @@
+{% extends 'WF/base.html' %}
+
+{% block title %}Edit{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+
+{% block content %}
+{% load crispy_forms_tags %}
+<div style="background-color: #f3f4f6; min-height: 50vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+  <div style="background-color: white; border-radius: 1.5rem; box-shadow: 0 10px 15px rgba(0,0,0,0.1); max-width: 32rem; width: 100%; padding: 2rem;">
+    <h2 style="font-size: 1.875rem; font-weight: 800; color: #1f2937; margin-bottom: 2rem; text-align: center;">Edit Image</h2>
+    <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      {% csrf_token %}
+      <div>
+        {{ form|crispy }}
+      </div>
+      <button type="submit" style="width: 100%; background-color: #2563eb; color: white; font-weight: 600; padding: 0.75rem; border-radius: 9999px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.3s;">
+        Save
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
